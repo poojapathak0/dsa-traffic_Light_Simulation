@@ -1,5 +1,6 @@
 // traffic_light_simulator.c
 #include "traffic_light_simulator.h"
+#include "vehicle.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -50,10 +51,12 @@ void init_traffic_lights(TrafficLight* lights) {
         {WINDOW_WIDTH/2 - ROAD_WIDTH, WINDOW_HEIGHT/2 + ROAD_WIDTH}   // West
     };
 
+    Direction directions[4] = {NORTH, EAST, SOUTH, WEST};
+
     for (int i = 0; i < 4; i++) {
         lights[i].state = RED;
         lights[i].timer = RED_TIME;
-        lights[i].direction = i;
+        lights[i].direction = directions[i];
         lights[i].isPriority = (i == 1); // East is priority direction (AL2)
         lights[i].waitingVehicles = 0;
         lights[i].position = (SDL_Rect){
@@ -161,6 +164,71 @@ void render_lane_markings(SDL_Renderer* renderer) {
     }
 }
 
+void init_lane_queues(LaneQueue* queues) {
+    Direction directions[4] = {NORTH, EAST, SOUTH, WEST};
+    for (int i = 0; i < 4; i++) {
+        queues[i].vehicleCount = 0;
+        queues[i].front = NULL;
+        queues[i].rear = NULL;
+        queues[i].direction = directions[i];
+    }
+}
+
+void update_traffic_lights(TrafficLight* lights) {
+    for (int i = 0; i < 4; i++) {
+        lights[i].timer--;
+        if (lights[i].timer <= 0) {
+            switch (lights[i].state) {
+                case GREEN:
+                    lights[i].state = YELLOW;
+                    lights[i].timer = YELLOW_TIME;
+                    break;
+                case YELLOW:
+                    lights[i].state = RED;
+                    lights[i].timer = RED_TIME;
+                    break;
+                case RED:
+                    lights[i].state = GREEN;
+                    lights[i].timer = GREEN_TIME;
+                    break;
+            }
+        }
+    }
+}
+
+void update_vehicles(LaneQueue* queues, TrafficLight* lights) {
+    for (int i = 0; i < 4; i++) {
+        if (lights[i].state == GREEN && queues[i].front != NULL) {
+            // Remove vehicle from front of queue
+            Vehicle* temp = queues[i].front;
+            queues[i].front = queues[i].front->next;
+            free(temp);
+            queues[i].vehicleCount--;
+            
+            if (queues[i].front == NULL) {
+                queues[i].rear = NULL;
+            }
+        }
+    }
+}
+
+void handle_priority_signals(TrafficLight* lights) {
+    for (int i = 0; i < 4; i++) {
+        if (lights[i].isPriority && lights[i].waitingVehicles > PRIORITY_THRESHOLD) {
+            // Implement priority handling logic
+            lights[i].timer = MIN(lights[i].timer, 30); // Force faster transition
+        }
+    }
+}
+
+void render_vehicles(SDL_Renderer* renderer, LaneQueue* queues) {
+    // Basic vehicle rendering
+    SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+    for (int i = 0; i < 4; i++) {
+        // Add vehicle rendering logic here
+    }
+}
+
 int main(int argc, char* argv[]) {
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;
@@ -202,4 +270,10 @@ int main(int argc, char* argv[]) {
     
     cleanup_simulator(window, renderer);
     return 0;
+}
+
+void cleanup_simulator(SDL_Window* window, SDL_Renderer* renderer) {
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
 }

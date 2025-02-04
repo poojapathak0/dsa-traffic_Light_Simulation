@@ -4,9 +4,9 @@
 #include <time.h>
 #include <unistd.h>
 
-#define GENERATION_INTERVAL 2  // seconds
+#define GENERATION_INTERVAL 2
 #define NUM_LANES 4
-#define PRIORITY_LANE 1       // AL2 lane index
+#define PRIORITY_LANE 1      
 
 void generate_vehicle(int lane_id) {
     char filename[20];
@@ -24,7 +24,7 @@ void generate_vehicle(int lane_id) {
     }
 }
 
-int main() {
+int SDL_main(int argc, char *argv[]) {
     srand(time(NULL));
     
     while (1) {
