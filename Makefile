@@ -1,17 +1,12 @@
-CC=gcc
-CFLAGS=-I. -lSDL2 -lm
-DEPS=traffic_light_simulator.h
+CC=g++
+CFLAGS=-Iinclude -Llib -lmingw32 -lSDL2main -lSDL2
+SRCDIR=src
+BINDIR=bin
 
-%.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
+all: $(BINDIR)/simulator
 
-traffic_light_simulator: traffic_light_simulator.o
+$(BINDIR)/simulator: $(SRCDIR)/vehicle_generator.c $(SRCDIR)/traffic_light_simulator.c
 	$(CC) -o $@ $^ $(CFLAGS)
-
-vehicle_generator: vehicle_generator.o
-	$(CC) -o $@ $^ $(CFLAGS)
-
-.PHONY: clean
 
 clean:
-	rm -f *.o traffic_light_simulator vehicle_generator
+	rm -rf $(BINDIR)/*
