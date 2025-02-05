@@ -1,9 +1,6 @@
 // traffic_light_simulator.c
 #include "traffic_light_simulator.h"
-#include "vehicle.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+
 
 // Color definitions
 static const SDL_Color ROAD_COLOR = {80, 80, 80, 255};

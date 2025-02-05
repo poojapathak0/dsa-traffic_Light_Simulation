@@ -1,8 +1,13 @@
 #ifndef TRAFFIC_LIGHT_SIMULATOR_H
 #define TRAFFIC_LIGHT_SIMULATOR_H
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include "common_types.h"
+#include "vehicle.h"
 
 // Add MIN macro
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
@@ -19,14 +24,6 @@ typedef enum {
     GREEN
 } LightState;
 
-// Directions
-typedef enum {
-    NORTH,
-    EAST,
-    SOUTH,
-    WEST
-} Direction;
-
 // Traffic light structure
 typedef struct {
     LightState state;
@@ -36,16 +33,6 @@ typedef struct {
     int waitingVehicles;
     SDL_Rect position;
 } TrafficLight;
-
-// Vehicle types
-typedef enum {
-    CAR,
-    TRUCK,
-    BIKE
-} VehicleType;
-
-// Forward declare Vehicle struct
-struct Vehicle;
 
 // Lane queue structure
 typedef struct {

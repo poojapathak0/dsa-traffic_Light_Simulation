@@ -1,8 +1,8 @@
 #ifndef VEHICLE_H
 #define VEHICLE_H
 
-#include <SDL2/SDL.h>
-#include "traffic_light_simulator.h"
+#include <SDL.h>
+#include "common_types.h"
 
 // Vehicle structure
 typedef struct Vehicle {
