@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <windows.h>
+#include "vehicle.h"
 
 #define FILENAME "vehicles.data"
 
@@ -22,6 +23,22 @@ char generateLane() {
     return lanes[rand() % 4];
 }
 
+const char* vehicleTypeToString(VehicleType type) {
+    switch (type) {
+        case NORMAL: return "NORMAL";
+        case VIP: return "VIP";
+        case AMBULANCE: return "AMBULANCE";
+        default: return "UNKNOWN";
+    }
+}
+
+VehicleType generateVehicleType() {
+    int r = rand() % 100;
+    if (r < 70) return NORMAL;
+    if (r < 90) return VIP;
+    return AMBULANCE;
+}
+
 int main() {
     // Set console code page to UTF-8
     SetConsoleOutputCP(CP_UTF8);
@@ -31,6 +48,7 @@ int main() {
         char vehicle[9];
         generateVehicleNumber(vehicle);
         char lane = generateLane();
+        VehicleType type = generateVehicleType();
 
         FILE* file = fopen(FILENAME, "a");
         if (!file) {
@@ -38,11 +56,11 @@ int main() {
             return 1;
         }
 
-        fprintf(file, "%s:%c\n", vehicle, lane);
+        fprintf(file, "%s:%c:%s\n", vehicle, lane, vehicleTypeToString(type));
         fflush(file);
         fclose(file);
 
-        printf("Generated: %s:%c\n", vehicle, lane);
+        printf("Generated: %s:%c:%s\n", vehicle, lane, vehicleTypeToString(type));
         Sleep(1000);
     }
 

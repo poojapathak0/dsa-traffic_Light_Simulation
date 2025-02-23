@@ -2,58 +2,44 @@
 #include <stdlib.h>
 
 void queue_init(VehicleQueue* queue) {
-    queue->front = 0;
-    queue->rear = -1;
-    queue->size = 0;
-    pthread_mutex_init(&queue->mutex, NULL);
+    queue->front = queue->rear = NULL;
 }
 
-bool queue_enqueue(VehicleQueue* queue, Vehicle* vehicle) {
-    pthread_mutex_lock(&queue->mutex);
-    
-    if (queue->size >= MAX_QUEUE_SIZE) {
-        pthread_mutex_unlock(&queue->mutex);
-        return false;
+void queue_enqueue(VehicleQueue* queue, Vehicle* vehicle) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    if (newNode) {
+        newNode->vehicle = vehicle;
+        newNode->next = NULL;
+        if (queue->rear) {
+            queue->rear->next = newNode;
+        } else {
+            queue->front = newNode;
+        }
+        queue->rear = newNode;
     }
-
-    queue->rear = (queue->rear + 1) % MAX_QUEUE_SIZE;
-    queue->vehicles[queue->rear] = vehicle;
-    queue->size++;
-
-    pthread_mutex_unlock(&queue->mutex);
-    return true;
 }
 
 Vehicle* queue_dequeue(VehicleQueue* queue) {
-    pthread_mutex_lock(&queue->mutex);
-    
-    if (queue->size == 0) {
-        pthread_mutex_unlock(&queue->mutex);
-        return NULL;
+    if (queue->front) {
+        Node* temp = queue->front;
+        Vehicle* vehicle = temp->vehicle;
+        queue->front = queue->front->next;
+        if (!queue->front) {
+            queue->rear = NULL;
+        }
+        free(temp);
+        return vehicle;
     }
-
-    Vehicle* vehicle = queue->vehicles[queue->front];
-    queue->front = (queue->front + 1) % MAX_QUEUE_SIZE;
-    queue->size--;
-
-    pthread_mutex_unlock(&queue->mutex);
-    return vehicle;
+    return NULL;
 }
 
 bool queue_is_empty(VehicleQueue* queue) {
-    pthread_mutex_lock(&queue->mutex);
-    bool empty = (queue->size == 0);
-    pthread_mutex_unlock(&queue->mutex);
-    return empty;
-}
-
-int queue_size(VehicleQueue* queue) {
-    pthread_mutex_lock(&queue->mutex);
-    int size = queue->size;
-    pthread_mutex_unlock(&queue->mutex);
-    return size;
+    return queue->front == NULL;
 }
 
 void queue_destroy(VehicleQueue* queue) {
-    pthread_mutex_destroy(&queue->mutex);
+    while (!queue_is_empty(queue)) {
+        Vehicle* vehicle = queue_dequeue(queue);
+        vehicle_destroy(vehicle);
+    }
 }

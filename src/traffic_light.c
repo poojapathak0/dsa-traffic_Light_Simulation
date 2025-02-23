@@ -1,42 +1,27 @@
 #include "traffic_light.h"
 
 void traffic_light_init(TrafficLight* lights) {
-    lights[0] = (TrafficLight){'A', {400, 300}, true};
-    lights[1] = (TrafficLight){'B', {400, 500}, true};
-    lights[2] = (TrafficLight){'C', {500, 400}, true};
-    lights[3] = (TrafficLight){'D', {300, 400}, true};
+    // Initialize traffic lights at the intersection
+    lights[0] = (TrafficLight){400, 200, 0}; // North
+    lights[1] = (TrafficLight){600, 400, 0}; // East
+    lights[2] = (TrafficLight){400, 600, 0}; // South
+    lights[3] = (TrafficLight){200, 400, 0}; // West
+}
+
+void traffic_light_update(TrafficLight* lights, int currentState) {
+    // Update traffic light states based on the current state
+    for (int i = 0; i < 4; i++) {
+        lights[i].state = (currentState == 1 && (i == 0 || i == 2)) ||
+                          (currentState == 2 && (i == 1 || i == 3));
+    }
 }
 
 void traffic_light_draw(SDL_Renderer* renderer, TrafficLight* light) {
-    SDL_SetRenderDrawColor(renderer, 150, 150, 150, 255);
-    SDL_Rect lightBox = {light->position.x, light->position.y, 50, 30};
-    SDL_RenderFillRect(renderer, &lightBox);
-
-    if(light->is_red) 
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    else 
-        SDL_SetRenderDrawColor(renderer, 11, 156, 50, 255);
-
-    SDL_Rect lightCircle = {light->position.x + 5, light->position.y + 5, 20, 20};
-    SDL_RenderFillRect(renderer, &lightCircle);
-}
-
-void traffic_light_update(TrafficLight* lights, int state) {
-    switch(state) {
-        case 0:
-            for(int i = 0; i < 4; i++) lights[i].is_red = true;
-            break;
-        case 1:
-            lights[0].is_red = false;
-            lights[1].is_red = true;
-            lights[2].is_red = false;
-            lights[3].is_red = true;
-            break;
-        case 2:
-            lights[0].is_red = true;
-            lights[1].is_red = false;
-            lights[2].is_red = true;
-            lights[3].is_red = false;
-            break;
+    SDL_Rect rect = {light->x - 10, light->y - 10, 20, 20};
+    if (light->state == 1) {
+        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // Green
+    } else {
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Red
     }
+    SDL_RenderFillRect(renderer, &rect);
 }
