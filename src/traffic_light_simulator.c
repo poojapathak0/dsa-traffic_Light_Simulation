@@ -162,14 +162,12 @@ void* readVehicleData(void* arg) {
                     type = VIP;
                 } else if (strcmp(typeStr, "AMBULANCE") == 0) {
                     type = AMBULANCE;
-                } else {
-                    continue;
                 }
                 int queueIndex = lane - 'A';
                 if (queueIndex >= 0 && queueIndex < 4) {
                     Vehicle* vehicle = vehicle_create(id, lane, type);
                     priority_queue_enqueue(&data->queues[queueIndex], vehicle);
-                    printf("Read vehicle: %s in lane: %c with type: %s\n", id, lane, typeStr); // Debug print statement
+                    printf("Read vehicle: %s in lane: %c with type: %s\n", id, lane, typeStr);
                 }
             }
         }
@@ -181,35 +179,28 @@ void* readVehicleData(void* arg) {
 }
 
 void drawRoadsAndLanes(SDL_Renderer* renderer) {
-    // Road background
     SDL_SetRenderDrawColor(renderer, 211, 211, 211, 255);
     SDL_Rect verticalRoad = {WINDOW_WIDTH/2 - 75, 0, 150, WINDOW_HEIGHT};
     SDL_Rect horizontalRoad = {0, WINDOW_HEIGHT/2 - 75, WINDOW_WIDTH, 150};
     SDL_RenderFillRect(renderer, &verticalRoad);
     SDL_RenderFillRect(renderer, &horizontalRoad);
 
-    // Lane markings
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     for(int i = 0; i <= 3; i++) {
         int offset = i * 50;
-        // Vertical lanes
         SDL_RenderDrawLine(renderer, WINDOW_WIDTH/2 - 75 + offset, 0,
                           WINDOW_WIDTH/2 - 75 + offset, WINDOW_HEIGHT);
-        // Horizontal lanes
         SDL_RenderDrawLine(renderer, 0, WINDOW_HEIGHT/2 - 75 + offset,
                           WINDOW_WIDTH, WINDOW_HEIGHT/2 - 75 + offset);
     }
 }
 
 bool initializeSDL(SDL_Window** window, SDL_Renderer** renderer) {
-    printf("Initializing SDL video subsystem...\n");
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         SDL_Log("SDL initialization failed: %s", SDL_GetError());
         return false;
     }
-    printf("SDL video subsystem initialized.\n");
 
-    printf("Creating SDL window...\n");
     *window = SDL_CreateWindow("Traffic Junction Simulator",
                              SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                              WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
@@ -217,15 +208,12 @@ bool initializeSDL(SDL_Window** window, SDL_Renderer** renderer) {
         SDL_Log("Window creation failed: %s", SDL_GetError());
         return false;
     }
-    printf("SDL window created.\n");
 
-    printf("Creating SDL renderer...\n");
     *renderer = SDL_CreateRenderer(*window, -1, SDL_RENDERER_ACCELERATED);
     if (!*renderer) {
         SDL_Log("Renderer creation failed: %s", SDL_GetError());
         return false;
     }
-    printf("SDL renderer created.\n");
 
     return true;
 }

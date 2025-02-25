@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <windows.h>
+#include "priority_queue.h"
 #include "queue.h"
 #include "vehicle.h"
 #include "traffic_light.h"
@@ -13,9 +14,9 @@
 #define MAX_VEHICLES 100
 
 typedef struct {
-    VehicleQueue queues[4];
-    TrafficLight lights[4];
-    int currentState;
+    PriorityQueue queues[4];  // Priority queues for all directions
+    TrafficLight lights[4];  // Traffic lights for all directions
+    int currentState;        // 0=all red, 1=A/C green, 2=B/D green
     Vehicle* activeVehicles[MAX_VEHICLES];
     int activeVehicleCount;
     pthread_mutex_t vehicleMutex;
@@ -44,7 +45,7 @@ int main(int argc, char* argv[]) {
     SharedData sharedData = {0};
     pthread_mutex_init(&sharedData.vehicleMutex, NULL);
     for(int i = 0; i < 4; i++) {
-        queue_init(&sharedData.queues[i]);
+        priority_queue_init(&sharedData.queues[i]);
     }
     traffic_light_init(sharedData.lights);
 
@@ -82,7 +83,7 @@ int main(int argc, char* argv[]) {
     }
 
     for(int i = 0; i < 4; i++) {
-        queue_destroy(&sharedData.queues[i]);
+        priority_queue_destroy(&sharedData.queues[i]);
     }
     pthread_mutex_destroy(&sharedData.vehicleMutex);
     SDL_DestroyRenderer(renderer);
@@ -100,9 +101,9 @@ void* processQueues(void* arg) {
     while(1) {
         cycleTime = (cycleTime + 1) % 20;
         if (cycleTime < 10) {
-            data->currentState = 1;
+            data->currentState = 1; // A/C green
         } else {
-            data->currentState = 2;
+            data->currentState = 2; // B/D green
         }
         traffic_light_update(data->lights, data->currentState);
 
@@ -112,8 +113,8 @@ void* processQueues(void* arg) {
             bool canMove = (data->currentState == 1 && (direction == 'A' || direction == 'C')) ||
                           (data->currentState == 2 && (direction == 'B' || direction == 'D'));
 
-            if (canMove && !queue_is_empty(&data->queues[i])) {
-                Vehicle* vehicle = queue_dequeue(&data->queues[i]);
+            if (canMove && !priority_queue_is_empty(&data->queues[i])) {
+                Vehicle* vehicle = priority_queue_dequeue(&data->queues[i]);
                 if (vehicle && data->activeVehicleCount < MAX_VEHICLES) {
                     vehicle->is_moving = true;
                     data->activeVehicles[data->activeVehicleCount++] = vehicle;
@@ -130,7 +131,7 @@ void* processQueues(void* arg) {
 void* readVehicleData(void* arg) {
     SharedData* data = (SharedData*)arg;
     FILE* file;
-    char line[20];
+    char line[50];
     
     while(1) {
         file = fopen("vehicles.data", "r");
@@ -144,13 +145,23 @@ void* readVehicleData(void* arg) {
             line[strcspn(line, "\n")] = 0;
             char* id = strtok(line, ":");
             char* laneStr = strtok(NULL, ":");
+            char* typeStr = strtok(NULL, ":");
             
-            if (id && laneStr) {
+            if (id && laneStr && typeStr) {
                 char lane = laneStr[0];
-                int queueIndex = lane - 'A';
+                VehicleType type;
+                if (strcmp(typeStr, "NORMAL") == 0) {
+                    type = NORMAL;
+                } else if (strcmp(typeStr, "VIP") == 0) {
+                    type = VIP;
+                } else if (strcmp(typeStr, "AMBULANCE") == 0) {
+                    type = AMBULANCE;
+                }
+                int queueIndex = lane - 'A';  // Adjust based on lane configuration
                 if (queueIndex >= 0 && queueIndex < 4) {
-                    Vehicle* vehicle = vehicle_create(id, lane);
-                    queue_enqueue(&data->queues[queueIndex], vehicle);
+                    Vehicle* vehicle = vehicle_create(id, lane, type);
+                    priority_queue_enqueue(&data->queues[queueIndex], vehicle);
+                    printf("Read vehicle: %s in lane: %c with type: %s\n", id, lane, typeStr); // Debug print statement
                 }
             }
         }
