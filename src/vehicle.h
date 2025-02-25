@@ -1,7 +1,6 @@
 #ifndef VEHICLE_H
 #define VEHICLE_H
-
-#include <stdbool.h>
+#include <stdbool.h>    
 #include <SDL.h>
 
 typedef enum {

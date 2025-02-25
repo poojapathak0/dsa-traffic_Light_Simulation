@@ -18,20 +18,20 @@ Vehicle* vehicle_create(const char* id, char lane, VehicleType type) {
         // Set initial positions based on lane
         switch (lane) {
             case 'A': // North to South
-                vehicle->x = 400 - VEHICLE_WIDTH / 2;
+                vehicle->x = 400 - VEHICLE_WIDTH/2;
                 vehicle->y = 0;
                 break;
             case 'B': // East to West
                 vehicle->x = 800 - VEHICLE_WIDTH;
-                vehicle->y = 400 - VEHICLE_HEIGHT / 2;
+                vehicle->y = 400 - VEHICLE_HEIGHT/2;
                 break;
             case 'C': // South to North
-                vehicle->x = 400 + VEHICLE_WIDTH / 2;
+                vehicle->x = 400 + VEHICLE_WIDTH/2;
                 vehicle->y = 800 - VEHICLE_HEIGHT;
                 break;
             case 'D': // West to East
                 vehicle->x = 0;
-                vehicle->y = 400 + VEHICLE_HEIGHT / 2;
+                vehicle->y = 400 + VEHICLE_HEIGHT/2;
                 break;
         }
     }
@@ -89,7 +89,7 @@ void vehicle_draw(SDL_Renderer* renderer, Vehicle* vehicle) {
 
     // Draw vehicle details (windows)
     SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255); // Light gray
-
+    
     // Top window
     SDL_Rect window1 = {
         vehicle->x + 5,
@@ -98,7 +98,7 @@ void vehicle_draw(SDL_Renderer* renderer, Vehicle* vehicle) {
         10
     };
     SDL_RenderFillRect(renderer, &window1);
-
+    
     // Bottom window
     SDL_Rect window2 = {
         vehicle->x + 5,
@@ -112,15 +112,15 @@ void vehicle_draw(SDL_Renderer* renderer, Vehicle* vehicle) {
     if (vehicle->type == AMBULANCE) {
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_Rect cross_v = {
-            vehicle->x + VEHICLE_WIDTH / 2 - 2,
-            vehicle->y + VEHICLE_HEIGHT / 4,
+            vehicle->x + VEHICLE_WIDTH/2 - 2,
+            vehicle->y + VEHICLE_HEIGHT/4,
             4,
-            VEHICLE_HEIGHT / 3
+            VEHICLE_HEIGHT/3
         };
         SDL_Rect cross_h = {
-            vehicle->x + VEHICLE_WIDTH / 4,
-            vehicle->y + VEHICLE_HEIGHT / 2 - 2,
-            VEHICLE_WIDTH / 2,
+            vehicle->x + VEHICLE_WIDTH/4,
+            vehicle->y + VEHICLE_HEIGHT/2 - 2,
+            VEHICLE_WIDTH/2,
             4
         };
         SDL_RenderFillRect(renderer, &cross_v);
