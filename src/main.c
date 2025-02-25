@@ -99,10 +99,11 @@ int main(int argc, char* argv[]) {
 void* processQueues(void* arg) {
     SharedData* data = (SharedData*)arg;
     int cycleTime = 0;
+    int cycleDuration = 50; // Increased from 20 to 50 for longer light durations
 
     while(1) {
-        cycleTime = (cycleTime + 1) % 20;
-        if (cycleTime < 10) {
+        cycleTime = (cycleTime + 1) % cycleDuration;
+        if (cycleTime < cycleDuration / 2) {
             data->currentState = 1;
         } else {
             data->currentState = 2;
@@ -129,7 +130,6 @@ void* processQueues(void* arg) {
     }
     return NULL;
 }
-
 void* readVehicleData(void* arg) {
     SharedData* data = (SharedData*)arg;
     FILE* file;

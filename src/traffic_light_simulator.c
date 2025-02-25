@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
         pthread_mutex_lock(&sharedData.vehicleMutex);
         for(int i = 0; i < sharedData.activeVehicleCount; i++) {
             if (sharedData.activeVehicles[i]) {
-                vehicle_update_position(sharedData.activeVehicles[i]);
+                vehicle_update_position(sharedData.activeVehicles[i], sharedData.lights);
                 vehicle_draw(renderer, sharedData.activeVehicles[i]);
             }
         }
@@ -114,10 +114,10 @@ void* processQueues(void* arg) {
 
         // Process queues based on light state
         pthread_mutex_lock(&data->vehicleMutex);
-        for(int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; i++) {
             char direction = 'A' + i;
             bool canMove = (data->currentState == 1 && (direction == 'A' || direction == 'C')) ||
-                          (data->currentState == 2 && (direction == 'B' || direction == 'D'));
+                           (data->currentState == 2 && (direction == 'B' || direction == 'D'));
 
             if (canMove && !priority_queue_is_empty(&data->queues[i])) {
                 Vehicle* vehicle = priority_queue_dequeue(&data->queues[i]);

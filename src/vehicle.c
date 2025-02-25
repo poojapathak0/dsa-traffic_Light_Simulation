@@ -6,6 +6,12 @@
 #define VEHICLE_HEIGHT 50
 #define MOVEMENT_SPEED 2
 
+// Define stopping points for each lane
+#define STOP_POINT_A_Y 350
+#define STOP_POINT_B_X 700
+#define STOP_POINT_C_Y 450
+#define STOP_POINT_D_X 100
+
 Vehicle* vehicle_create(const char* id, char lane, VehicleType type) {
     Vehicle* vehicle = (Vehicle*)malloc(sizeof(Vehicle));
     if (vehicle) {
@@ -38,34 +44,48 @@ Vehicle* vehicle_create(const char* id, char lane, VehicleType type) {
     return vehicle;
 }
 
-void vehicle_update_position(Vehicle* vehicle) {
+bool is_light_green_for_lane(TrafficLight* lights, char lane) {
+    switch (lane) {
+        case 'A': return lights[0].state == 1;
+        case 'B': return lights[1].state == 1;
+        case 'C': return lights[2].state == 1;
+        case 'D': return lights[3].state == 1;
+        default: return false;
+    }
+}
+
+bool is_near_stop_point(Vehicle* vehicle) {
+    switch (vehicle->lane) {
+        case 'A': return vehicle->y >= STOP_POINT_A_Y - MOVEMENT_SPEED && vehicle->y <= STOP_POINT_A_Y + MOVEMENT_SPEED;
+        case 'B': return vehicle->x <= STOP_POINT_B_X + MOVEMENT_SPEED && vehicle->x >= STOP_POINT_B_X - MOVEMENT_SPEED;
+        case 'C': return vehicle->y <= STOP_POINT_C_Y + MOVEMENT_SPEED && vehicle->y >= STOP_POINT_C_Y - MOVEMENT_SPEED;
+        case 'D': return vehicle->x >= STOP_POINT_D_X - MOVEMENT_SPEED && vehicle->x <= STOP_POINT_D_X + MOVEMENT_SPEED;
+        default: return false;
+    }
+}
+
+void vehicle_update_position(Vehicle* vehicle, TrafficLight* lights) {
     if (!vehicle->is_moving) return;
 
+    // Allow ambulances to pass regardless of traffic light state
+    if (vehicle->type != AMBULANCE) {
+        // Check if the vehicle is near its stopping point and the light is red
+        if (is_near_stop_point(vehicle) && !is_light_green_for_lane(lights, vehicle->lane)) {
+            return; // Stop the vehicle if the light is red
+        }
+    }
+
+    // Move the vehicle
     switch (vehicle->lane) {
-        case 'A': // Moving South
-            vehicle->y += MOVEMENT_SPEED;
-            if (vehicle->y > 800) {
-                vehicle->is_moving = false;
-            }
-            break;
-        case 'B': // Moving West
-            vehicle->x -= MOVEMENT_SPEED;
-            if (vehicle->x < -VEHICLE_WIDTH) {
-                vehicle->is_moving = false;
-            }
-            break;
-        case 'C': // Moving North
-            vehicle->y -= MOVEMENT_SPEED;
-            if (vehicle->y < -VEHICLE_HEIGHT) {
-                vehicle->is_moving = false;
-            }
-            break;
-        case 'D': // Moving East
-            vehicle->x += MOVEMENT_SPEED;
-            if (vehicle->x > 800) {
-                vehicle->is_moving = false;
-            }
-            break;
+        case 'A': vehicle->y += MOVEMENT_SPEED; break; // Moving South
+        case 'B': vehicle->x -= MOVEMENT_SPEED; break; // Moving West
+        case 'C': vehicle->y -= MOVEMENT_SPEED; break; // Moving North
+        case 'D': vehicle->x += MOVEMENT_SPEED; break; // Moving East
+    }
+
+    // Check if vehicle has exited the screen
+    if (vehicle->x < -VEHICLE_WIDTH || vehicle->x > 800 || vehicle->y < -VEHICLE_HEIGHT || vehicle->y > 800) {
+        vehicle->is_moving = false;
     }
 }
 
