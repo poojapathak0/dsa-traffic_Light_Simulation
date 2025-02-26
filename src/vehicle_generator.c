@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
         generateVehicleNumber(vehicle);
         char lane = generateLane();
         VehicleType type = generateVehicleType();
-        int turnLeft = willTurnLeft();
+        int turnLeft = willTurnLeft(); // Determine if the vehicle will turn left
 
         int laneIndex = lane - 'A';
         EnterCriticalSection(&cs[laneIndex]); // Enter critical section for the lane
@@ -71,6 +71,7 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
+        // Log the vehicle's action, including left turn if applicable
         fprintf(file, "%s:%c:%s:%s\n", vehicle, lane, vehicleTypeToString(type), turnLeft ? "LEFT" : "STRAIGHT");
         fflush(file);
         fclose(file);
