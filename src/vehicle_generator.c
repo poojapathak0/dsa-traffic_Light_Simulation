@@ -44,6 +44,8 @@ int main(int argc, char *argv[]) {
     SetConsoleOutputCP(CP_UTF8);
     srand(time(NULL));
 
+    int laneCounts[4] = {0, 0, 0, 0}; // Initialize vehicle counts for each lane
+
     while (1) {
         char vehicle[9];
         generateVehicleNumber(vehicle);
@@ -61,7 +63,24 @@ int main(int argc, char *argv[]) {
         fclose(file);
 
         printf("Generated: %s:%c:%s\n", vehicle, lane, vehicleTypeToString(type));
-        Sleep(1000);
+
+        // Update lane vehicle count
+        int laneIndex = lane - 'A';
+        laneCounts[laneIndex]++;
+
+        // Adjust sleep duration based on vehicle type and lane vehicle count
+        if (type == AMBULANCE) {
+            Sleep(50); // Ambulance has higher speed, so shorter sleep duration
+        } else {
+            if (laneCounts[laneIndex] >= 10) {
+                Sleep(500); // Higher priority for lanes with 10 or more vehicles
+            } else {
+                Sleep(1000); // Normal and VIP vehicles have standard speed
+            }
+        }
+
+        // Decrease count to simulate vehicle passing
+        laneCounts[laneIndex]--;
     }
 
     return 0;
