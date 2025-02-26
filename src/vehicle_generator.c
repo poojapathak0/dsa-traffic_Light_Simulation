@@ -39,6 +39,10 @@ VehicleType generateVehicleType() {
     return AMBULANCE;
 }
 
+int willTurnLeft() {
+    return rand() % 2; // 50% chance to turn left
+}
+
 int main(int argc, char *argv[]) {
     // Set console code page to UTF-8
     SetConsoleOutputCP(CP_UTF8);
@@ -55,6 +59,7 @@ int main(int argc, char *argv[]) {
         generateVehicleNumber(vehicle);
         char lane = generateLane();
         VehicleType type = generateVehicleType();
+        int turnLeft = willTurnLeft();
 
         int laneIndex = lane - 'A';
         EnterCriticalSection(&cs[laneIndex]); // Enter critical section for the lane
@@ -66,11 +71,11 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
-        fprintf(file, "%s:%c:%s\n", vehicle, lane, vehicleTypeToString(type));
+        fprintf(file, "%s:%c:%s:%s\n", vehicle, lane, vehicleTypeToString(type), turnLeft ? "LEFT" : "STRAIGHT");
         fflush(file);
         fclose(file);
 
-        printf("Generated: %s:%c:%s\n", vehicle, lane, vehicleTypeToString(type));
+        printf("Generated: %s:%c:%s:%s\n", vehicle, lane, vehicleTypeToString(type), turnLeft ? "LEFT" : "STRAIGHT");
 
         // Update lane vehicle count
         laneCounts[laneIndex]++;
