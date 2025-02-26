@@ -39,7 +39,7 @@ VehicleType generateVehicleType() {
     return AMBULANCE;
 }
 
-int main() {
+int main(int argc, char *argv[]) {
     // Set console code page to UTF-8
     SetConsoleOutputCP(CP_UTF8);
     srand(time(NULL));
