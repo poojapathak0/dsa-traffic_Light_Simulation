@@ -45,6 +45,10 @@ int main(int argc, char *argv[]) {
     srand(time(NULL));
 
     int laneCounts[4] = {0, 0, 0, 0}; // Initialize vehicle counts for each lane
+    CRITICAL_SECTION cs[4]; // Critical sections for each lane
+    for (int i = 0; i < 4; i++) {
+        InitializeCriticalSection(&cs[i]);
+    }
 
     while (1) {
         char vehicle[9];
@@ -52,9 +56,13 @@ int main(int argc, char *argv[]) {
         char lane = generateLane();
         VehicleType type = generateVehicleType();
 
+        int laneIndex = lane - 'A';
+        EnterCriticalSection(&cs[laneIndex]); // Enter critical section for the lane
+
         FILE* file = fopen(FILENAME, "a");
         if (!file) {
             perror("Error opening file");
+            LeaveCriticalSection(&cs[laneIndex]); // Leave critical section for the lane
             return 1;
         }
 
@@ -65,7 +73,6 @@ int main(int argc, char *argv[]) {
         printf("Generated: %s:%c:%s\n", vehicle, lane, vehicleTypeToString(type));
 
         // Update lane vehicle count
-        int laneIndex = lane - 'A';
         laneCounts[laneIndex]++;
 
         // Adjust sleep duration based on vehicle type and lane vehicle count
@@ -81,6 +88,12 @@ int main(int argc, char *argv[]) {
 
         // Decrease count to simulate vehicle passing
         laneCounts[laneIndex]--;
+
+        LeaveCriticalSection(&cs[laneIndex]); // Leave critical section for the lane
+    }
+
+    for (int i = 0; i < 4; i++) {
+        DeleteCriticalSection(&cs[i]); // Delete critical sections for each lane
     }
 
     return 0;
