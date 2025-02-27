@@ -5,7 +5,6 @@
 #include "vehicle.h"
 
 #define FILENAME "vehicles.data"
-#define MIN_TIME_GAP 30000 // Minimum time gap between vehicles in the same lane (in milliseconds)
 
 void generateVehicleNumber(char* buffer) {
     buffer[0] = 'A' + rand() % 26;
@@ -55,8 +54,6 @@ int main(int argc, char *argv[]) {
         InitializeCriticalSection(&cs[i]);
     }
 
-    DWORD lastVehicleTime[4] = {0, 0, 0, 0}; // Last vehicle generation time for each lane
-
     while (1) {
         char vehicle[9];
         generateVehicleNumber(vehicle);
@@ -66,13 +63,6 @@ int main(int argc, char *argv[]) {
     
         int laneIndex = lane - 'A';
         EnterCriticalSection(&cs[laneIndex]); // Enter critical section for the lane
-
-        DWORD currentTime = GetTickCount();
-        if (currentTime - lastVehicleTime[laneIndex] < MIN_TIME_GAP) {
-            LeaveCriticalSection(&cs[laneIndex]); // Leave critical section for the lane
-            Sleep(MIN_TIME_GAP - (currentTime - lastVehicleTime[laneIndex])); // Wait for the remaining time gap
-            continue;
-        }
     
         FILE* file = fopen(FILENAME, "a");
         if (!file) {
@@ -90,10 +80,12 @@ int main(int argc, char *argv[]) {
     
         // Update lane vehicle count
         laneCounts[laneIndex]++;
-        lastVehicleTime[laneIndex] = currentTime; // Update last vehicle generation time
     
         // Increase sleep duration to 3000ms (3 seconds) to reduce vehicle generation frequency
         Sleep(3000);
+    
+        // Decrease count to simulate vehicle passing
+        laneCounts[laneIndex]--;
     
         LeaveCriticalSection(&cs[laneIndex]); // Leave critical section for the lane
     }
