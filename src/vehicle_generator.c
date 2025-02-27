@@ -60,41 +60,33 @@ int main(int argc, char *argv[]) {
         char lane = generateLane();
         VehicleType type = generateVehicleType();
         int turnLeft = willTurnLeft(); // Determine if the vehicle will turn left
-
+    
         int laneIndex = lane - 'A';
         EnterCriticalSection(&cs[laneIndex]); // Enter critical section for the lane
-
+    
         FILE* file = fopen(FILENAME, "a");
         if (!file) {
             perror("Error opening file");
             LeaveCriticalSection(&cs[laneIndex]); // Leave critical section for the lane
             return 1;
         }
-
+    
         // Log the vehicle's action, including left turn if applicable
         fprintf(file, "%s:%c:%s:%s\n", vehicle, lane, vehicleTypeToString(type), turnLeft ? "LEFT" : "STRAIGHT");
         fflush(file);
         fclose(file);
-
+    
         printf("Generated: %s:%c:%s:%s\n", vehicle, lane, vehicleTypeToString(type), turnLeft ? "LEFT" : "STRAIGHT");
-
+    
         // Update lane vehicle count
         laneCounts[laneIndex]++;
-
-        // Adjust sleep duration based on vehicle type and lane vehicle count
-        if (type == AMBULANCE) {
-            Sleep(50); // Ambulance has higher speed, so shorter sleep duration
-        } else {
-            if (laneCounts[laneIndex] >= 10) {
-                Sleep(500); // Higher priority for lanes with 10 or more vehicles
-            } else {
-                Sleep(1000); // Normal and VIP vehicles have standard speed
-            }
-        }
-
+    
+        // Increase sleep duration to 3000ms (3 seconds) to reduce vehicle generation frequency
+        Sleep(3000);
+    
         // Decrease count to simulate vehicle passing
         laneCounts[laneIndex]--;
-
+    
         LeaveCriticalSection(&cs[laneIndex]); // Leave critical section for the lane
     }
 

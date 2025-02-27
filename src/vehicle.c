@@ -100,6 +100,7 @@ void vehicle_draw(SDL_Renderer* renderer, Vehicle* vehicle) {
             break;
         case AMBULANCE:
             SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Red
+
             break;
     }
 
