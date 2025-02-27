@@ -26,26 +26,10 @@ void* processQueues(void* arg);
 void* readVehicleData(void* arg);
 bool initializeSDL(SDL_Window** window, SDL_Renderer** renderer);
 
-void updateTrafficLights(SharedData* data) {
-    int priorityLaneCount = queue_size(&data->queues[0]); // Assuming AL2 is the priority lane
-
-    if (priorityLaneCount > 10) {
-        data->currentState = 2; // High-Priority Condition
-    } else if (priorityLaneCount < 5) {
-        data->currentState = 1; // Normal Condition
-    }
-
-    for (int i = 0; i < 4; i++) {
-        data->lights[i].state = (i == 0 && data->currentState == 2) ? 2 : 1; // Manage state for priority lane
-    }
-
-    traffic_light_update(data->lights, data->currentState);
-}
-
 int main(int argc, char* argv[]) {
     // Set up Windows console for proper output
     SetConsoleOutputCP(CP_UTF8);
-
+    
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;
     SDL_Event event;
@@ -88,9 +72,9 @@ int main(int argc, char* argv[]) {
         for(int i = 0; i < sharedData.activeVehicleCount; i++) {
             if (sharedData.activeVehicles[i] && sharedData.activeVehicles[i]->state != EXITED) {
                 vehicle_update_position(sharedData.activeVehicles[i],
-                                        sharedData.activeVehicles,
-                                        sharedData.activeVehicleCount,
-                                        sharedData.currentState);
+                                      sharedData.activeVehicles,
+                                      sharedData.activeVehicleCount,
+                                      sharedData.currentState);
                 vehicle_draw(renderer, sharedData.activeVehicles[i]);
             }
         }
@@ -119,13 +103,18 @@ void* processQueues(void* arg) {
 
     while(1) {
         cycleTime = (cycleTime + 1) % cycleDuration;
-        updateTrafficLights(data);
+        if (cycleTime < cycleDuration / 2) {
+            data->currentState = 1;
+        } else {
+            data->currentState = 2;
+        }
+        traffic_light_update(data->lights, data->currentState);
 
         pthread_mutex_lock(&data->vehicleMutex);
         for(int i = 0; i < 4; i++) {
             char direction = 'A' + i;
             bool canMove = (data->currentState == 1 && (direction == 'A' || direction == 'C')) ||
-                           (data->currentState == 2 && (direction == 'B' || direction == 'D'));
+                          (data->currentState == 2 && (direction == 'B' || direction == 'D'));
 
             if (canMove && !queue_is_empty(&data->queues[i])) {
                 Vehicle* vehicle = queue_dequeue(&data->queues[i]);
@@ -141,12 +130,11 @@ void* processQueues(void* arg) {
     }
     return NULL;
 }
-
 void* readVehicleData(void* arg) {
     SharedData* data = (SharedData*)arg;
     FILE* file;
     char line[20];
-
+    
     while(1) {
         file = fopen("vehicles.data", "r");
         if (!file) {
@@ -159,7 +147,7 @@ void* readVehicleData(void* arg) {
             line[strcspn(line, "\n")] = 0;
             char* id = strtok(line, ":");
             char* laneStr = strtok(NULL, ":");
-
+            
             if (id && laneStr) {
                 char lane = laneStr[0];
                 int queueIndex = lane - 'A';
@@ -169,7 +157,7 @@ void* readVehicleData(void* arg) {
                 }
             }
         }
-
+        
         fclose(file);
         Sleep(1000); // Windows sleep function
     }

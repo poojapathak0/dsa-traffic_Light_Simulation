@@ -3,9 +3,13 @@
 
 #include <SDL.h>
 
+#define GREEN 1
+#define YELLOW 2
+#define RED 0
+
 typedef struct {
     int x, y;
-    int state; // 0=red, 1=green
+    int state;
 } TrafficLight;
 
 void traffic_light_init(TrafficLight* lights);
