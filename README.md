@@ -1,5 +1,5 @@
 # Traffic Junction Simulator
-![Image](https://github.com/user-attachments/assets/37c63a52-4618-4f27-8b67-04561709a4d4)
+                               ![Image](https://github.com/user-attachments/assets/37c63a52-4618-4f27-8b67-04561709a4d4)
 A real-time traffic junction simulation system that models vehicle flow, traffic light cycles, and priority vehicle handling at a four-way intersection.
 
 ## Overview
