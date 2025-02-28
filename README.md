@@ -1,5 +1,5 @@
 # Traffic Junction Simulator
-
+![alt text](image.png)
 A real-time traffic junction simulation system that models vehicle flow, traffic light cycles, and priority vehicle handling at a four-way intersection.
 
 ## Overview
